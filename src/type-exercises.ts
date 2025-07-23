@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Exercise #1: Filter object properties by type.
  * 
@@ -8,6 +9,7 @@
  * type OmitBoolean = OmitByType<{
  *   name: string;
  *   count: number;
+ // eslint-disable-next-line prettier/prettier
  *   isReadonly: boolean;
  *   isEnable: boolean;
  * }, boolean>; 
@@ -22,8 +24,42 @@
 
 
 // Add here your solution
+// Generic type solution 1
+type FilterProperties<Type,Omited>=  { //Gets 2 Types
+    //If Type = Omited Type then it gets replaced, else it stays the same
+    [K in keyof Type]: Type[K] extends Omited ? null : Type[K]; }
+    //This solution only replaces the property, but it remains in the object
+
+//Solution 2
+type FilterProperties2<Type,Omited>=  { //Gets 2 Types
+    //If Type = Omited Type then the KEY gets reeplaced to never
+    [K in keyof Type as Type[K] extends Omited ? never : K] : Type[K] }
+
+
 
 // Add here your example
+
+// Object with string, string, boolean
+const User = {
+    name:  'chris',
+    email: 'chris@email.com',
+    active: true,
+    count: 2,
+    isReadOnly: false
+}
+
+//Extracting the types of the object with typeof and filtering booleans
+type newType = FilterProperties2<typeof User, boolean>
+
+/**
+ * Resulting type:
+ * 
+ * { 
+ * name: string; 
+ * email: string;
+ * count: number; 
+ * }
+ */
 
 /**
  * Exercise #2: Implement the utility type `If<C, T, F>`, which evaluates a condition `C` 
