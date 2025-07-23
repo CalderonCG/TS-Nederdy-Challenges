@@ -22,30 +22,31 @@
  * }
  */
 
-
 // Add here your solution
 // Generic type solution 1
-type FilterProperties<Type,Omited>=  { //Gets 2 Types
-    //If Type = Omited Type then it gets replaced, else it stays the same
-    [K in keyof Type]: Type[K] extends Omited ? null : Type[K]; }
-    //This solution only replaces the property, but it remains in the object
+type FilterProperties<Type, Omited> = {
+  //Gets 2 Types
+  //If Type = Omited Type then it gets replaced, else it stays the same
+  [K in keyof Type]: Type[K] extends Omited ? null : Type[K]
+}
+//This solution only replaces the property, but it remains in the object
 
 //Solution 2
-type FilterProperties2<Type,Omited>=  { //Gets 2 Types
-    //If Type = Omited Type then the KEY gets reeplaced to never
-    [K in keyof Type as Type[K] extends Omited ? never : K] : Type[K] }
-
-
+type FilterProperties2<Type, Omited> = {
+  //Gets 2 Types
+  //If Type = Omited Type then the KEY gets reeplaced to never
+  [K in keyof Type as Type[K] extends Omited ? never : K]: Type[K]
+}
 
 // Add here your example
 
 // Object with string, string, boolean
 const User = {
-    name:  'chris',
-    email: 'chris@email.com',
-    active: true,
-    count: 2,
-    isReadOnly: false
+  name: 'chris',
+  email: 'chris@email.com',
+  active: true,
+  count: 2,
+  isReadOnly: false,
 }
 
 //Extracting the types of the object with typeof and filtering booleans
@@ -53,68 +54,92 @@ type newType = FilterProperties2<typeof User, boolean>
 
 /**
  * Resulting type:
- * 
- * { 
- * name: string; 
+ *
+ * {
+ * name: string;
  * email: string;
- * count: number; 
+ * count: number;
  * }
  */
 
 /**
- * Exercise #2: Implement the utility type `If<C, T, F>`, which evaluates a condition `C` 
+ * Exercise #2: Implement the utility type `If<C, T, F>`, which evaluates a condition `C`
  * and returns one of two possible types:
  * - `T` if `C` is `true`
  * - `F` if `C` is `false`
- * 
+ *
  * @description
  * - `C` is expected to be either `true` or `false`.
  * - `T` and `F` can be any type.
- * 
+ *
  * @example
  * type A = If<true, 'a', 'b'>;  // expected to be 'a'
  * type B = If<false, 'a', 'b'>; // expected to be 'b'
  */
 
-
 // Add here your solution
+type If<C, T, F> = C extends true ? T : F
 
 // Add here your example
-
+type A = If<true, 'a', 'b'> // expected to be 'a'
+type B = If<false, 'a', 'b'> // expected to be 'b'
 /**
  * Exercise #3: Recreate the built-in `Readonly<T>` utility type without using it.
- * 
+ *
  * @description
- * Constructs a type that makes all properties of `T` readonly. 
+ * Constructs a type that makes all properties of `T` readonly.
  * This means the properties of the resulting type cannot be reassigned.
- * 
+ *
  * @example
  * interface Todo {
  *   title: string;
  *   description: string;
  * }
- * 
+ *
  * const todo: MyReadonly<Todo> = {
  *   title: "Hey",
  *   description: "foobar"
  * };
- * 
+ *
  * todo.title = "Hello";       // Error: cannot reassign a readonly property
  * todo.description = "barFoo"; // Error: cannot reassign a readonly property
  */
 
 
+
+
 // Add here your solution
+
+interface Todo { //Basic interface
+  title: string
+  description: string
+}
+
+type MyReadonly<T> = { // Just add the readonly keyword and then map the object
+  readonly [K in keyof T]: T[K]
+}
 
 // Add here your example
 
+const readonlyObject: MyReadonly<Todo> = { //Object modified to be readonly
+    title : "Hello",
+    description: "Chris"
+};
+
+const notReadonlyObject: Todo = { //Object modified to be readonly
+    title : "Hello",
+    description: "Gerardo"
+};
+
+readonlyObject.title = "Goodbye"; // Error: cannot reassign a readonly property
+notReadonlyObject.title = "Goodbye"; // Can reassign
 
 /**
  * Exercise #4: Recreate the built-in `ReturnType<T>` utility type without using it.
- * 
+ *
  * @description
  * The `MyReturnType<T>` utility type extracts the return type of a function type `T`.
- * 
+ *
  * @example
  * const fn = (v: boolean) => {
  *   if (v) {
@@ -123,7 +148,7 @@ type newType = FilterProperties2<typeof User, boolean>
  *     return 2;
  *   }
  * };
- * 
+ *
  * type a = MyReturnType<typeof fn>; // expected to be "1 | 2"
  */
 
@@ -133,15 +158,15 @@ type newType = FilterProperties2<typeof User, boolean>
 
 /**
  * Exercise #5: Extract the type inside a wrapped type like `Promise`.
- * 
+ *
  * @description
  * Implement a utility type `MyAwaited<T>` that retrieves the type wrapped in a `Promise` or similar structure.
- * 
+ *
  * If `T` is `Promise<ExampleType>`, the resulting type should be `ExampleType`.
- * 
+ *
  * @example
  * type ExampleType = Promise<string>;
- * 
+ *
  * type Result = MyAwaited<ExampleType>; // expected to be "string"
  */
 
@@ -149,25 +174,24 @@ type newType = FilterProperties2<typeof User, boolean>
 
 // Add here your example
 
-
 /**
  * Exercise 6: Create a utility type `RequiredByKeys<T, K>` that makes specific keys of `T` required.
- * 
+ *
  * @description
  * The type takes two arguments:
  * - `T`: The object type.
  * - `K`: A union of keys in `T` that should be made required.
- * 
+ *
  * If `K` is not provided, the utility should behave like the built-in `Required<T>` type, making all properties required.
- * 
+ *
  * @example
  * interface User {
  *   name?: string;
  *   age?: number;
  *   address?: string;
  * }
- * 
- * type UserRequiredName = RequiredByKeys<User, 'name'>; 
+ *
+ * type UserRequiredName = RequiredByKeys<User, 'name'>;
  * expected to be: { name: string; age?: number; address?: string }
  */
 
