@@ -105,34 +105,35 @@ type B = If<false, 'a', 'b'> // expected to be 'b'
  * todo.description = "barFoo"; // Error: cannot reassign a readonly property
  */
 
-
-
-
 // Add here your solution
 
-interface Todo { //Basic interface
+interface Todo {
+  //Basic interface
   title: string
   description: string
 }
 
-type MyReadonly<T> = { // Just add the readonly keyword and then map the object
-  readonly [K in keyof T]: T[K]
+type MyReadonly<T> = {
+  readonly // Just add the readonly keyword and then map the object
+  [K in keyof T]: T[K]
 }
 
 // Add here your example
 
-const readonlyObject: MyReadonly<Todo> = { //Object modified to be readonly
-    title : "Hello",
-    description: "Chris"
-};
+const readonlyObject: MyReadonly<Todo> = {
+  //Object modified to be readonly
+  title: 'Hello',
+  description: 'Chris',
+}
 
-const notReadonlyObject: Todo = { //Object modified to be readonly
-    title : "Hello",
-    description: "Gerardo"
-};
+const notReadonlyObject: Todo = {
+  //Object modified to be readonly
+  title: 'Hello',
+  description: 'Gerardo',
+}
 
-readonlyObject.title = "Goodbye"; // Error: cannot reassign a readonly property
-notReadonlyObject.title = "Goodbye"; // Can reassign
+readonlyObject.title = 'Goodbye' // Error: cannot reassign a readonly property
+notReadonlyObject.title = 'Goodbye' // Can reassign
 
 /**
  * Exercise #4: Recreate the built-in `ReturnType<T>` utility type without using it.
@@ -153,6 +154,19 @@ notReadonlyObject.title = "Goodbye"; // Can reassign
  */
 
 // Add here your solution
+
+const fn = (v: boolean) => {
+  if (v) {
+    return 1
+  } else {
+    return 2
+  }
+}
+
+
+type b = typeof fn
+
+// type a = MyReturnType<typeof fn> // expected to be "1 | 2"
 
 // Add here your example
 
@@ -195,6 +209,30 @@ notReadonlyObject.title = "Goodbye"; // Can reassign
  * expected to be: { name: string; age?: number; address?: string }
  */
 
+ interface User { //Basic interface
+   name?: string;
+   age?: number;
+   address?: string;
+ }
+
+
 // Add here your solution
+type RequireEverything<T, U> = { //The "-?" operator removes the ? operator
+  [K in keyof T] -? : T[K]
+}//This solution removes all ? operators
+
+//This type split the type into 2 parts: The required key and the not required keys
+type RequiredKey<T, U extends keyof T>= Merge<Required<Pick<T,U>> & Omit<T,U>>
+//Typescript doesnt normalize the output of this type so it shows 
+//type test = Required<Pick<User, "name">> & Omit<User, "name">
+
+//To normalize that output the Type Merge maps the output into an object type
+type Merge<T> = {
+  [K in keyof T]: T[K]
+}
 
 // Add here your example
+
+
+//Type { name: string; age?: number; address?: string }
+type test= RequiredKey<User, "name"> 
