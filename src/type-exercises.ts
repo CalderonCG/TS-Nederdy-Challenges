@@ -23,7 +23,7 @@
  */
 
 // Add here your solution
-// Generic type solution 1
+// Partial solution
 type FilterProperties<Type, Omited> = {
   //Gets 2 Types
   //If Type = Omited Type then it gets replaced, else it stays the same
@@ -31,8 +31,8 @@ type FilterProperties<Type, Omited> = {
 }
 //This solution only replaces the property, but it remains in the object
 
-//Solution 2
-type FilterProperties2<Type, Omited> = {
+//Solution
+type OmitByType<Type, Omited> = {
   //Gets 2 Types
   //If Type = Omited Type then the KEY gets reeplaced to never
   [K in keyof Type as Type[K] extends Omited ? never : K]: Type[K]
@@ -43,21 +43,18 @@ type FilterProperties2<Type, Omited> = {
 // Object with string, string, boolean
 const User = {
   name: 'chris',
-  email: 'chris@email.com',
-  active: true,
   count: 2,
-  isReadOnly: false,
+  isReadonly: true,
+  isEnable: false,
 }
-
 //Extracting the types of the object with typeof and filtering booleans
-type newType = FilterProperties2<typeof User, boolean>
+type newType = OmitByType<typeof User, boolean>
 
 /**
  * Resulting type:
  *
  * {
  * name: string;
- * email: string;
  * count: number;
  * }
  */
@@ -113,9 +110,9 @@ interface Todo {
   description: string
 }
 
+// Just add the readonly keyword and then map the object
 type MyReadonly<T> = {
-  readonly // Just add the readonly keyword and then map the object
-  [K in keyof T]: T[K]
+  readonly [K in keyof T]: T[K]
 }
 
 // Add here your example
@@ -163,13 +160,12 @@ const fn = (v: boolean) => {
   }
 }
 
-
-type b = typeof fn
-
-// type a = MyReturnType<typeof fn> // expected to be "1 | 2"
+//Extends verifies if fn follows the structure () => type
+type myReturnType<fn> = fn extends (...args: any) => infer X ? X : never
 
 // Add here your example
-
+// expected to be "1 | 2"
+type a = myReturnType<typeof fn>
 /**
  * Exercise #5: Extract the type inside a wrapped type like `Promise`.
  *
@@ -185,9 +181,13 @@ type b = typeof fn
  */
 
 // Add here your solution
+type promisedType = Promise<string>
+
+//Extends verifies if it follows structure Promise<type>
+type MyAwaited<exampleType> = exampleType extends Promise<infer X> ? X : never
 
 // Add here your example
-
+type Result = MyAwaited<promisedType> //Expected to be string
 /**
  * Exercise 6: Create a utility type `RequiredByKeys<T, K>` that makes specific keys of `T` required.
  *
@@ -209,21 +209,24 @@ type b = typeof fn
  * expected to be: { name: string; age?: number; address?: string }
  */
 
- interface User { //Basic interface
-   name?: string;
-   age?: number;
-   address?: string;
- }
-
+interface User {
+  //Basic interface
+  name?: string
+  age?: number
+  address?: string
+}
 
 // Add here your solution
-type RequireEverything<T, U> = { //The "-?" operator removes the ? operator
-  [K in keyof T] -? : T[K]
-}//This solution removes all ? operators
+type RequireEverything<T, U> = {
+  //The "-?" operator removes the ? operator
+  [K in keyof T]-?: T[K]
+} //This solution removes all ? operators
 
 //This type split the type into 2 parts: The required key and the not required keys
-type RequiredKey<T, U extends keyof T>= Merge<Required<Pick<T,U>> & Omit<T,U>>
-//Typescript doesnt normalize the output of this type so it shows 
+type RequiredByKey<T, U extends keyof T> = Merge<
+  Required<Pick<T, U>> & Omit<T, U>
+>
+//Typescript doesnt normalize the output of this type so it shows
 //type test = Required<Pick<User, "name">> & Omit<User, "name">
 
 //To normalize that output the Type Merge maps the output into an object type
@@ -233,6 +236,5 @@ type Merge<T> = {
 
 // Add here your example
 
-
 //Type { name: string; age?: number; address?: string }
-type test= RequiredKey<User, "name"> 
+type test = RequiredByKey<User, 'name'>
