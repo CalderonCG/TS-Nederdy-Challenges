@@ -24,17 +24,17 @@
 
 // Add here your solution
 // Partial solution
-type FilterProperties<Type, Omited> = {
-  //Gets 2 Types
-  //If Type = Omited Type then it gets replaced, else it stays the same
-  [K in keyof Type]: Type[K] extends Omited ? null : Type[K]
-}
-//This solution only replaces the property, but it remains in the object
+// type FilterProperties<Type, Omited> = {
+//   Gets 2 Types
+//   If Type = Omited Type then it gets replaced, else it stays the same
+//   [K in keyof Type]: Type[K] extends Omited ? null : Type[K]
+// }
+// This solution only replaces the property, but it remains in the object
 
 //Solution
 type OmitByType<Type, Omited> = {
   //Gets 2 Types
-  //If Type = Omited Type then the KEY gets reeplaced to never
+  //If Type === Omited Type then the KEY gets reeplaced to never
   [K in keyof Type as Type[K] extends Omited ? never : K]: Type[K]
 }
 
@@ -58,7 +58,7 @@ type newType = OmitByType<typeof User, boolean>
  * count: number;
  * }
  */
-
+//------------------------------------------------------------------------------------------------------
 /**
  * Exercise #2: Implement the utility type `If<C, T, F>`, which evaluates a condition `C`
  * and returns one of two possible types:
@@ -129,11 +129,13 @@ const notReadonlyObject: Todo = {
   description: 'Gerardo',
 }
 
-notReadonlyObject.title = 'Goodbye' // Can reassign
+// Can be reassigned
+notReadonlyObject.title = 'Goodbye'
 
 //@ts-expect-error /Error: cannot reassign a readonly property
 readonlyObject.title = 'Goodbye'
 
+//------------------------------------------------------------------------------------------------------
 /**
  * Exercise #4: Recreate the built-in `ReturnType<T>` utility type without using it.
  *
@@ -168,6 +170,8 @@ type myReturnType<fn> = fn extends (...args: any) => infer X ? X : never
 // Add here your example
 // expected to be "1 | 2"
 type a = myReturnType<typeof fn>
+
+//------------------------------------------------------------------------------------------------------
 /**
  * Exercise #5: Extract the type inside a wrapped type like `Promise`.
  *
@@ -183,13 +187,25 @@ type a = myReturnType<typeof fn>
  */
 
 // Add here your solution
-type promisedType = Promise<string>
 
 //Extends verifies if it follows structure Promise<type>
-type MyAwaited<exampleType> = exampleType extends Promise<infer X> ? X : never
+type MyAwaited<exampleType> = exampleType extends Promise<infer X>
+  ? NestedType<X>
+  : never
+
+//If it has nested types makes recursive call
+type NestedType<exampleType> = exampleType extends Promise<infer X>
+  ? NestedType<X>
+  : exampleType
 
 // Add here your example
-type Result = MyAwaited<promisedType> //Expected to be string
+
+type PromisedType = Promise<string>
+type NestedPromise = Promise<Promise<Promise<number>>>
+type Result = MyAwaited<PromisedType> //Expected to be string
+type NestedResult = MyAwaited<NestedPromise> //Expected to be number
+
+//-------------------------------------------------------------------------
 /**
  * Exercise 6: Create a utility type `RequiredByKeys<T, K>` that makes specific keys of `T` required.
  *
@@ -240,6 +256,6 @@ type Merge<T> = {
 // Add here your example
 
 //Type { name: string; age?: number; address?: string }
-type requireName = RequiredByKey<User, 'age'>
+type RequireName = RequiredByKey<User, 'age'>
 //Type { name: string; age: number; address: string }
-type requireUndefined = RequiredByKey<User>
+type RequireUndefined = RequiredByKey<User>

@@ -14,7 +14,6 @@ interface TemperatureSummary {
   average: number
 }
 
-
 //Array of temperatures
 const example = [
   {
@@ -74,60 +73,63 @@ const temperatureMap: Map<string, Map<string, number[]>> = new Map()
 
 //This function will store the readings in a map, with city as the key
 export function processReadings(readings: TemperatureReading[]): void {
-
-
   readings.forEach((temp) => {
     const city = temp.city
+
+    //Validate date is valid
+    if (!(temp.time instanceof Date && !isNaN(temp.time.getTime()))) {
+      return
+    }
     //Normalize format of date into string
-    const dateString = temp.time.toISOString()
+    const dateString = temp.time.toISOString().split('T')[0]
+
     //Checks if that city is already in the map
-    if (!temperatureMap.has(city)) {
+    let tempCity = temperatureMap.get(city) //tempCity is a reference so mutating it will affect my map
+    if (!tempCity) {
       //If city is new, create a new map
-      temperatureMap.set(city, new Map())
+      tempCity = new Map()
+      temperatureMap.set(city, tempCity)
     }
 
     //Checks if that time is already in the city's map
-    //Use the '!' non null assertion
-    const tempCity = temperatureMap.get(city)!
-    if (!tempCity.has(dateString)) {
+    let tempDate = tempCity.get(dateString) //tempDate is a reference
+    if (!tempDate) {
       //If the date is new, crete a map with empty array
-      tempCity.set(dateString, [])
+      tempDate = []
+      tempCity.set(dateString, tempDate)
     }
 
     //Push the temperature into that map
-    tempCity.get(dateString)!.push(temp.temperature)
+    tempDate.push(temp.temperature)
   })
 }
-
 
 export function getTemperatureSummary(
   date: Date,
   city: string,
 ): TemperatureSummary | null {
-  
   //Normalize date parameter
-  const dateString = date.toISOString()
+  const dateString = date.toISOString().split('T')[0]
 
   //Checks if city and date exist in the map
-  if (temperatureMap.has(city) && temperatureMap.get(city)!.has(dateString)) {
+  const temperatures = temperatureMap.get(city)?.get(dateString)
+  if (temperatures) {
+    //Calcs average temp
+    const averageTemp =
+      temperatures.reduce(
+        (accumulator, currentValue) => accumulator + currentValue,
+      ) / temperatures.length
 
-      //gets the temperature array
-      const temperatures = temperatureMap.get(city)!.get(dateString)!
-
-      //Calcs average temp
-      const averageTemp = temperatures.reduce((accumulator, currentValue) => accumulator + currentValue) / (temperatures.length)
-
-      //Results
-      const result:TemperatureSummary={
-        first : temperatures[0], //First temperature read
-        last : temperatures[temperatures.length - 1], //Last temperature read
-        high: Math.max(...temperatures), //Max temperature read
-        low: Math.min(...temperatures), //Lowest temperature read
-        average: averageTemp //Average temperature
-        
-      }
-      return result
+    //Results
+    const result: TemperatureSummary = {
+      first: temperatures[0], //First temperature read
+      last: temperatures[temperatures.length - 1], //Last temperature read
+      high: Math.max(...temperatures), //Max temperature read
+      low: Math.min(...temperatures), //Lowest temperature read
+      average: averageTemp, //Average temperature
+    }
+    return result
   }
   //If city or date doesnt exist returns null
-    return null
+  return null
 }
