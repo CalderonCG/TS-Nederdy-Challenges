@@ -74,11 +74,15 @@ const temperatureMap: Map<string, Map<string, number[]>> = new Map()
 
 //This function will store the readings in a map, with city as the key
 export function processReadings(readings: TemperatureReading[]): void {
+
+
   readings.forEach((temp) => {
     const city = temp.city
+    //Normalize format of date into string
     const dateString = temp.time.toISOString()
     //Checks if that city is already in the map
     if (!temperatureMap.has(city)) {
+      //If city is new, create a new map
       temperatureMap.set(city, new Map())
     }
 
@@ -86,32 +90,44 @@ export function processReadings(readings: TemperatureReading[]): void {
     //Use the '!' non null assertion
     const tempCity = temperatureMap.get(city)!
     if (!tempCity.has(dateString)) {
+      //If the date is new, crete a map with empty array
       tempCity.set(dateString, [])
     }
 
+    //Push the temperature into that map
     tempCity.get(dateString)!.push(temp.temperature)
   })
 }
+
 
 export function getTemperatureSummary(
   date: Date,
   city: string,
 ): TemperatureSummary | null {
   
+  //Normalize date parameter
   const dateString = date.toISOString()
+
+  //Checks if city and date exist in the map
   if (temperatureMap.has(city) && temperatureMap.get(city)!.has(dateString)) {
+
+      //gets the temperature array
       const temperatures = temperatureMap.get(city)!.get(dateString)!
+
+      //Calcs average temp
       const averageTemp = temperatures.reduce((accumulator, currentValue) => accumulator + currentValue) / (temperatures.length)
+
+      //Results
       const result:TemperatureSummary={
-        first : temperatures[0],
-        last : temperatures[temperatures.length - 1],
-        high: Math.max(...temperatures),
-        low: Math.min(...temperatures),
-        average: averageTemp
+        first : temperatures[0], //First temperature read
+        last : temperatures[temperatures.length - 1], //Last temperature read
+        high: Math.max(...temperatures), //Max temperature read
+        low: Math.min(...temperatures), //Lowest temperature read
+        average: averageTemp //Average temperature
         
       }
       return result
   }
-
+  //If city or date doesnt exist returns null
     return null
 }
