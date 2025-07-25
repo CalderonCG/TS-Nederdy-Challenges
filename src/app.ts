@@ -68,8 +68,30 @@ const example = [
   },
 ]
 
+
+const temperatureMap: Map<string, Map<Date, TemperatureReading[]>> = new Map()
+
+
+//This function will store the readings in a map, with city as the key
 export function processReadings(readings: TemperatureReading[]): void {
-  // add here your code
+  readings.forEach(temp => {
+    const city = temp.city
+    const dateString = temp.time.toString()
+    //Checks if that city is already in the map
+    if (!temperatureMap.has(city)){
+      temperatureMap.set(city, new Map())
+    } 
+
+    //Checks if that time is already in the city's map
+    //Use the '!' non null assertion
+    const tempCity = temperatureMap.get(city)!
+    if (!tempCity.has(temp.time)){
+      tempCity.set(temp.time, [])
+    } 
+
+    tempCity.get(temp.time)!.push(temp)
+  })
+  
 }
 
 export function getTemperatureSummary(

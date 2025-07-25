@@ -217,13 +217,13 @@ interface User {
 }
 
 // Add here your solution
-type RequireEverything<T, U> = {
+type RequireEverything<T> = {
   //The "-?" operator removes the ? operator
   [K in keyof T]-?: T[K]
 } //This solution removes all ? operators
 
 //This type split the type into 2 parts: The required key and the not required keys
-type RequiredByKey<T, U extends keyof T> = Merge<
+type RequiredByKey<T, U = undefined> = U extends undefined ? RequireEverything<T>:  Merge<
   Required<Pick<T, U>> & Omit<T, U>
 >
 //Typescript doesnt normalize the output of this type so it shows
@@ -237,4 +237,6 @@ type Merge<T> = {
 // Add here your example
 
 //Type { name: string; age?: number; address?: string }
-type test = RequiredByKey<User, 'name'>
+type requireName = RequiredByKey<User, 'age'>
+//Type { name: string; age: number; address: string }
+type requireUndefined = RequiredByKey<User>
