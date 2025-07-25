@@ -15,9 +15,10 @@ interface TemperatureSummary {
 }
 
 
+//Array of temperatures
 const example = [
   {
-    time: new Date,
+    time: new Date('1/3/2021'),
     temperature: 8,
     city: 'Utah',
   },
@@ -68,36 +69,49 @@ const example = [
   },
 ]
 
-
-const temperatureMap: Map<string, Map<Date, TemperatureReading[]>> = new Map()
-
+//Nested maps, first key is city, second key is date parsed into string
+const temperatureMap: Map<string, Map<string, number[]>> = new Map()
 
 //This function will store the readings in a map, with city as the key
 export function processReadings(readings: TemperatureReading[]): void {
-  readings.forEach(temp => {
+  readings.forEach((temp) => {
     const city = temp.city
-    const dateString = temp.time.toString()
+    const dateString = temp.time.toISOString()
     //Checks if that city is already in the map
-    if (!temperatureMap.has(city)){
+    if (!temperatureMap.has(city)) {
       temperatureMap.set(city, new Map())
-    } 
+    }
 
     //Checks if that time is already in the city's map
     //Use the '!' non null assertion
     const tempCity = temperatureMap.get(city)!
-    if (!tempCity.has(temp.time)){
-      tempCity.set(temp.time, [])
-    } 
+    if (!tempCity.has(dateString)) {
+      tempCity.set(dateString, [])
+    }
 
-    tempCity.get(temp.time)!.push(temp)
+    tempCity.get(dateString)!.push(temp.temperature)
   })
-  
 }
 
 export function getTemperatureSummary(
   date: Date,
   city: string,
 ): TemperatureSummary | null {
-  //add here your code
-  return null
+  
+  const dateString = date.toISOString()
+  if (temperatureMap.has(city) && temperatureMap.get(city)!.has(dateString)) {
+      const temperatures = temperatureMap.get(city)!.get(dateString)!
+      const averageTemp = temperatures.reduce((accumulator, currentValue) => accumulator + currentValue) / (temperatures.length)
+      const result:TemperatureSummary={
+        first : temperatures[0],
+        last : temperatures[temperatures.length - 1],
+        high: Math.max(...temperatures),
+        low: Math.min(...temperatures),
+        average: averageTemp
+        
+      }
+      return result
+  }
+
+    return null
 }

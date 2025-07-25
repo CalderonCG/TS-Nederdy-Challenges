@@ -129,8 +129,10 @@ const notReadonlyObject: Todo = {
   description: 'Gerardo',
 }
 
-readonlyObject.title = 'Goodbye' // Error: cannot reassign a readonly property
 notReadonlyObject.title = 'Goodbye' // Can reassign
+
+//@ts-expect-error /Error: cannot reassign a readonly property
+readonlyObject.title = 'Goodbye'
 
 /**
  * Exercise #4: Recreate the built-in `ReturnType<T>` utility type without using it.
@@ -223,9 +225,10 @@ type RequireEverything<T> = {
 } //This solution removes all ? operators
 
 //This type split the type into 2 parts: The required key and the not required keys
-type RequiredByKey<T, U = undefined> = U extends undefined ? RequireEverything<T>:  Merge<
-  Required<Pick<T, U>> & Omit<T, U>
->
+type RequiredByKey<T, U = undefined> = U extends keyof T
+  ? Merge<RequireEverything<Pick<T, U>> & Omit<T, U>>
+  : RequireEverything<T>
+
 //Typescript doesnt normalize the output of this type so it shows
 //type test = Required<Pick<User, "name">> & Omit<User, "name">
 
